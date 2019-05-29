@@ -1,17 +1,17 @@
 ;; POSIX clocks
 
 ;;;; Copyright (C) 2016 Andy Wingo <wingo@pobox.com>
-;;;; 
+;;;;
 ;;;; This library is free software; you can redistribute it and/or
 ;;;; modify it under the terms of the GNU Lesser General Public
 ;;;; License as published by the Free Software Foundation; either
 ;;;; version 3 of the License, or (at your option) any later version.
-;;;; 
+;;;;
 ;;;; This library is distributed in the hope that it will be useful,
 ;;;; but WITHOUT ANY WARRANTY; without even the implied warranty of
 ;;;; MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
 ;;;; Lesser General Public License for more details.
-;;;; 
+;;;;
 ;;;; You should have received a copy of the GNU Lesser General Public
 ;;;; License along with this library; if not, write to the Free Software
 ;;;; Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
@@ -57,6 +57,11 @@
 (define CLOCK_MONOTONIC_RAW 4)
 (define CLOCK_REALTIME_COARSE 5)
 (define CLOCK_MONOTONIC_COARSE 6)
+
+(define FreeBSD_CLOCK_MONOTONIC 4)
+; monotonic-fast is updated every hertz, ie granularity. Check your kern.hz
+(define FreeBSD_CLOCK_MONOTONIC_FAST 12)
+(define FreeBSD_CLOCK_THREAD_CPUTIME_ID 14)
 
 (define clock-getcpuclockid
   (let* ((ptr (dynamic-pointer "clock_getcpuclockid" exe))
@@ -117,7 +122,8 @@
          (proc (pointer->procedure int ptr (list clockid-t int '* '*))))
     (lambda* (clockid nsec #:key absolute? (buf (nsec->timespec nsec)))
       (let* ((flags (if absolute? TIMER_ABSTIME 0))
-             (ret (proc clockid flags buf buf)))
+             (ret (proc FreeBSD_CLOCK_MONOTONIC_FAST ; clockid
+                        flags buf buf)))
         (cond
          ((zero? ret) (values #t 0))
          ((eqv? ret EINTR) (values #f (timespec->nsec buf)))
@@ -128,7 +134,7 @@
 ;; this 2-core, 2-thread-per-core skylake laptop:
 ;;
 ;; Clock type     | Applied Hz | Actual Hz | CPU time overhead (%)
-;; ---------------------------------------------------------------         
+;; ---------------------------------------------------------------
 ;; MONOTONIC        100          98           0.4
 ;; MONOTONIC        1000         873          4.4
 ;; MONOTONIC        10000        6242         6.4

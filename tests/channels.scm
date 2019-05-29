@@ -76,6 +76,7 @@
   (let ((request (make-channel)))
     (for-each (lambda (m)
                 (spawn-fiber (lambda ()
+                               (format #t "INSIDE A FIBER doing PING-PONG!~%")
                                (let lp ((n 0))
                                  (when (< n N)
                                    (let ((reply (make-channel)))

@@ -78,4 +78,5 @@ Return zero values."
    ((provided? 'threads)
     (with-interrupts/thread-cputime hz pred interrupt thunk))
    (else
+    (error "refusing to do signal-based-interrupts")
     (with-interrupts/sigprof hz pred interrupt thunk))))
