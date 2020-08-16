@@ -47,10 +47,15 @@ case "$host_os" in
         build_darwin=yes
         PLATFORM=darwin
         ;;
+     cygwin*)
+        build_cygwin=yes
+        PLATFORM=cygwin
+        ;;
 esac
 
 AM_CONDITIONAL([DARWIN], [test "$build_darwin" = "yes"])
 AM_CONDITIONAL([LINUX], [test "$build_linux" = "yes"])
+AM_CONDITIONAL([CYGWIN], [test "$build_cygwin" = "yes"])
 AC_SUBST(PLATFORM)
 
 #
